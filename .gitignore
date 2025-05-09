@@ -1,0 +1,33 @@
+# Compiled object files
+*.o
+*.obj
+*.out
+
+# Compiled executables
+*.exe
+*.app
+
+# Libraries
+*.lib
+*.a
+*.so
+*.dylib
+
+# Debug files
+*.dSYM/
+
+# IDE specific files
+.vscode/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.swp
+
+# macOS specific files
+.DS_Store
+
+# Build directories
+build/
+bin/
+obj/
