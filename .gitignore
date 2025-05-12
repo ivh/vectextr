@@ -50,3 +50,4 @@ dist/
 venv/
 env/
 uv.lock
+.windsurf
