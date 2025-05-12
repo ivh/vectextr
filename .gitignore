@@ -6,6 +6,7 @@
 # Compiled executables
 *.exe
 *.app
+extract_test
 
 # Libraries
 *.lib
@@ -31,3 +32,21 @@
 build/
 bin/
 obj/
+
+# Python specific
+__pycache__/
+*.py[cod]
+*$py.class
+*.so
+.Python
+env/
+_skbuild/
+dist/
+*.egg-info/
+.installed.cfg
+*.egg
+
+# Python environment and package files
+venv/
+env/
+uv.lock

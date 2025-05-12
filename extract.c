@@ -1,6 +1,18 @@
 
 #include <math.h>
-#include <cpl.h>
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+#include <stdarg.h>
+
+/* Logging level constants (replacing CPL_MSG_*) */
+#define MSG_DEBUG 0
+#define MSG_INFO 1
+#define MSG_WARNING 2
+#define MSG_ERROR 3
+
+/* Current message level */
+static int current_msg_level = MSG_WARNING;
 
 typedef unsigned char byte;
 #define min(a,b) (((a)<(b))?(a):(b))
@@ -41,54 +53,92 @@ static int debug_output(
     int         y_lower_lim,
     double  *   slitdeltas)
 {
-cpl_image * img;
-cpl_vector * vec;
-cpl_propertylist * pl;
-
-pl = cpl_propertylist_new();
-cpl_propertylist_append_int(pl, "osample", osample);
-cpl_propertylist_append_int(pl, "y_lower_lim", y_lower_lim);
-
-img = cpl_image_wrap_double(ncols, nrows, im);
-cpl_image_save(img, "debug_image_at_error.fits", CPL_TYPE_DOUBLE, pl,
-    CPL_IO_CREATE);
-cpl_image_unwrap(img);
-
-img = cpl_image_wrap_int(ncols, nrows, mask);
-cpl_image_save(img, "debug_mask_after_error.fits", CPL_TYPE_INT, NULL,
-    CPL_IO_CREATE);
-cpl_image_unwrap(img);
-
-img = cpl_image_wrap_double(ncols, nrows, pix_unc);
-cpl_image_save(img, "debug_unc_at_error.fits", CPL_TYPE_DOUBLE, NULL,
-    CPL_IO_CREATE);
-cpl_image_unwrap(img);
-
-vec = cpl_vector_wrap(ncols, ycen);
-cpl_vector_save(vec, "debug_ycen_after_error.fits", CPL_TYPE_DOUBLE, NULL,
-    CPL_IO_CREATE);
-cpl_vector_unwrap(vec);
-
-vec = cpl_vector_new(ncols);
-for (int i = 0; i < ncols; i++) cpl_vector_set(vec, i, ycen_offset[i]);
-cpl_vector_save(vec, "debug_offset_after_error.fits", CPL_TYPE_INT, NULL,
-    CPL_IO_CREATE);
-cpl_vector_delete(vec);
-
-// img = cpl_image_new(ncols, 3, CPL_TYPE_DOUBLE);
-// for (cpl_size i = 0; i < ncols; i++){
-//     for (cpl_size j = 0; j < 3 ; j++){
-//         cpl_image_set(img, i+1, j+1,
-//             slitdeltas[i*osample+j]);
-//     }
-// }
-// cpl_image_save(img, "debug_slitcurves_at_error.fits", CPL_TYPE_DOUBLE,
-//     NULL, CPL_IO_CREATE);
-// cpl_image_delete(img);
-
-cpl_propertylist_delete(pl);
-
-return 0;
+    FILE *fp;
+    int i, j;
+    
+    /* Write image as text file */
+    fp = fopen("debug_image_at_error.txt", "w");
+    if (fp) {
+        fprintf(fp, "# Debug image: %d x %d\n", ncols, nrows);
+        fprintf(fp, "# Properties:\n");
+        fprintf(fp, "# osample = %d\n", osample);
+        fprintf(fp, "# y_lower_lim = %d\n", y_lower_lim);
+        fprintf(fp, "# Data:\n");
+        for (j = 0; j < nrows; j++) {
+            for (i = 0; i < ncols; i++) {
+                fprintf(fp, "%g ", im[j * ncols + i]);
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
+    
+    /* Write mask as text file */
+    fp = fopen("debug_mask_after_error.txt", "w");
+    if (fp) {
+        fprintf(fp, "# Debug mask: %d x %d\n", ncols, nrows);
+        fprintf(fp, "# Data:\n");
+        for (j = 0; j < nrows; j++) {
+            for (i = 0; i < ncols; i++) {
+                fprintf(fp, "%d ", mask[j * ncols + i]);
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
+    
+    /* Write uncertainty as text file */
+    fp = fopen("debug_unc_at_error.txt", "w");
+    if (fp) {
+        fprintf(fp, "# Debug uncertainty: %d x %d\n", ncols, nrows);
+        fprintf(fp, "# Data:\n");
+        for (j = 0; j < nrows; j++) {
+            for (i = 0; i < ncols; i++) {
+                fprintf(fp, "%g ", pix_unc[j * ncols + i]);
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
+    
+    /* Write ycen as text file */
+    fp = fopen("debug_ycen_after_error.txt", "w");
+    if (fp) {
+        fprintf(fp, "# Debug ycen: %d\n", ncols);
+        fprintf(fp, "# Data:\n");
+        for (i = 0; i < ncols; i++) {
+            fprintf(fp, "%g\n", ycen[i]);
+        }
+        fclose(fp);
+    }
+    
+    /* Write offset as text file */
+    fp = fopen("debug_offset_after_error.txt", "w");
+    if (fp) {
+        fprintf(fp, "# Debug offset: %d\n", ncols);
+        fprintf(fp, "# Data:\n");
+        for (i = 0; i < ncols; i++) {
+            fprintf(fp, "%d\n", ycen_offset[i]);
+        }
+        fclose(fp);
+    }
+    
+    /* Uncomment if needed
+    fp = fopen("debug_slitcurves_at_error.txt", "w");
+    if (fp) {
+        fprintf(fp, "# Debug slitcurves: %d x %d\n", ncols, 3);
+        fprintf(fp, "# Data:\n");
+        for (j = 0; j < 3; j++) {
+            for (i = 0; i < ncols; i++) {
+                fprintf(fp, "%g ", slitdeltas[i*osample+j]);
+            }
+            fprintf(fp, "\n");
+        }
+        fclose(fp);
+    }
+    */
+    
+    return 0;
 }
 
 
@@ -198,7 +248,7 @@ return 0;
   @return
  */
 /*----------------------------------------------------------------------------*/
-static int xi_zeta_tensors(
+int xi_zeta_tensors(
         int         ncols,
         int         nrows,
         int         ny,
@@ -643,7 +693,7 @@ static int xi_zeta_tensors(
   @return
  */
 /*----------------------------------------------------------------------------*/
-static int extract(
+int extract(
         double      error_factor,
         int         ncols,
         int         nrows,
@@ -671,7 +721,8 @@ static int extract(
         double    *  p_Aij,
         double    *  l_bj,
         double    *  p_bj,
-        cpl_image *  img_mad,
+        double    *  img_mad,
+        int       *  img_mad_mask,
         xi_ref    *  xi,
         zeta_ref  *  zeta,
         int       *  m_zeta)
@@ -680,7 +731,6 @@ static int extract(
     double norm, lambda, diag_tot, ww, www, sP_change, sP_med;
     double tmp, sLmax, sum;
     int info, iter;
-    cpl_vector *tmp_vec;
 
     /* The size of the sL array. */
     /* Extra osample is because ycen can be between 0 and 1. */
@@ -790,8 +840,9 @@ static int extract(
             /* Solve the system of equations */
             info = bandsol(l_Aij, l_bj, ny,
                                                   4 * osample + 1, lambda);
-            if (info)
-                cpl_msg_error(__func__, "info(sL)=%d\n", info);
+            if (info && current_msg_level <= MSG_ERROR) {
+                fprintf(stderr, "ERROR (%s): info(sL)=%d\n", __func__, info);
+            }
 
             /* Normalize the slit function */
             norm = 0.e0;
@@ -863,17 +914,45 @@ static int extract(
 
         /* Solve the system of equations */
         info = bandsol(p_Aij, p_bj, ncols, nx, lambda);
-        if (info)
-            cpl_msg_error(__func__, "info(sP)=%d\n", info);
+        if (info && current_msg_level <= MSG_ERROR) {
+            fprintf(stderr, "ERROR (%s): info(sP)=%d\n", __func__, info);
+        }
 
         for (x = 0; x < ncols; x++)
             sP[x] = p_bj[x]; /* New Spectrum vector */
 
 
         /* Compute median value of the spectrum for normalisation purpose */
-        tmp_vec = cpl_vector_wrap(ncols, sP);
-        sP_med = fabs(cpl_vector_get_median_const(tmp_vec));
-        cpl_vector_unwrap(tmp_vec);
+        /* First copy and take absolute values */
+        double *sP_copy = malloc(ncols * sizeof(double));
+        if (sP_copy == NULL) {
+            fprintf(stderr, "ERROR (%s): Memory allocation failed\n", __func__);
+            return -1;
+        }
+        
+        for (x = 0; x < ncols; x++) {
+            sP_copy[x] = fabs(sP[x]);
+        }
+        
+        /* Sort the array */
+        for (int i = 0; i < ncols-1; i++) {
+            for (int j = 0; j < ncols-i-1; j++) {
+                if (sP_copy[j] > sP_copy[j+1]) {
+                    double temp = sP_copy[j];
+                    sP_copy[j] = sP_copy[j+1];
+                    sP_copy[j+1] = temp;
+                }
+            }
+        }
+        
+        /* Get the median */
+        if (ncols % 2 == 0) {
+            sP_med = (sP_copy[ncols/2-1] + sP_copy[ncols/2]) / 2.0;
+        } else {
+            sP_med = sP_copy[ncols/2];
+        }
+        
+        free(sP_copy);
 
         /* Compute the change in the spectrum */
         sP_change = 0.e0;
@@ -882,11 +961,12 @@ static int extract(
                 sP_change = fabs(sP[x] - sP_old[x]);
         }
 
-        if ((isnan(sP[0]) || (sP[ncols / 2] == 0)) &&
-            (cpl_msg_get_level() == CPL_MSG_DEBUG)) {
-            debug_output(ncols, nrows, osample, im, pix_unc, mask, ycen,
-                         ycen_offset, y_lower_lim, slitdeltas);
-            cpl_msg_error(__func__, "Swath failed");
+        if (isnan(sP[0]) || (sP[ncols / 2] == 0)) {
+            if (current_msg_level <= MSG_DEBUG) {
+                debug_output(ncols, nrows, osample, im, pix_unc, mask, ycen,
+                             ycen_offset, y_lower_lim, slitdeltas);
+                fprintf(stderr, "ERROR (%s): Swath failed\n", __func__);
+            }
         }
 
         /* Compute the model */
@@ -941,17 +1021,15 @@ static int extract(
 
         for (y = 0; y < nrows; y++) {
             for (x = delta_x; x < ncols - delta_x; x++) {
-                cpl_image_set(img_mad, x + 1, y + 1,
-                              (model[y * ncols + x] - im[y * ncols + x]));
-                if ((mask[y * ncols + x] == 0) | (im[y * ncols + x] == 0))
-                    cpl_image_reject(img_mad, x + 1, y + 1);
+                img_mad[y * ncols + x] = (model[y * ncols + x] - im[y * ncols + x]);
+                img_mad_mask[y * ncols + x] = (mask[y * ncols + x] != 0) && (im[y * ncols + x] != 0);
             }
         }
 
-        cpl_msg_debug(
-            __func__,
-            "Iter: %i, Sigma: %f, Cost: %f, sP_change: %f, sP_lim: %f", iter,
-            sigma, cost, sP_change, sP_stop * sP_med);
+        if (current_msg_level <= MSG_DEBUG) {
+            fprintf(stderr, "DEBUG (%s): Iter: %i, Sigma: %f, Cost: %f, sP_change: %f, sP_lim: %f\n", 
+                __func__, iter, sigma, cost, sP_change, sP_stop * sP_med);
+        }
 
         iter++;
     } while (iter == 1 ||
@@ -959,11 +1037,12 @@ static int extract(
               //                      && fabs(cost - cost_old) > sP_stop));
               && sP_change > sP_stop * sP_med));
 
-    if (iter == maxiter && sP_change > sP_stop * sP_med)
-        cpl_msg_warning(
-            __func__,
-            "Maximum number of %d iterations reached without converging.",
-            maxiter);
+    if (iter == maxiter && sP_change > sP_stop * sP_med) {
+        if (current_msg_level <= MSG_WARNING) {
+            fprintf(stderr, "WARNING (%s): Maximum number of %d iterations reached without converging.\n",
+                __func__, maxiter);
+        }
+    }
 
     /* Flip sign if converged in negative direction */
     sum = 0.0;
@@ -976,12 +1055,16 @@ static int extract(
             sP[x] *= -1.0;
         sum *= -1.0;
     }
-    tmp_vec = cpl_vector_wrap(ny, sL);
-    sLmax = cpl_vector_get_max(tmp_vec);
-    cpl_vector_unwrap(tmp_vec);
-    cpl_msg_debug(__func__,
-                  "sL-sum, sLmax, osample, nrows, ny: %g, %g, %d, %d, %d", sum,
-                  sLmax, osample, nrows, ny);
+    /* Find max value in sL */
+    sLmax = sL[0];
+    for (y = 1; y < ny; y++) {
+        if (sL[y] > sLmax) sLmax = sL[y];
+    }
+    
+    if (current_msg_level <= MSG_DEBUG) {
+        fprintf(stderr, "DEBUG (%s): sL-sum, sLmax, osample, nrows, ny: %g, %g, %d, %d, %d\n",
+            __func__, sum, sLmax, osample, nrows, ny);
+    }
 
 
     /*
