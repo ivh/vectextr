@@ -46,11 +46,16 @@ def test_extract_basic():
     ycen_offset = np.zeros(ncols, dtype=np.int32)  # No offsets
     
     # Slit curve coefficients - all zeros for a straight slit
-    # This needs to be updated after loading the image since ncols may have changed
+    # This represents curvature at each position along the slit (y-direction)
+    # Now the C code correctly indexes it by iy or y+y_lower_lim
     slitdeltas = np.zeros(ny, dtype=np.float64)
     
     # Initial slit function, horizontal median of im
     slit_func_in = np.median(im, axis=1)
+    # oversample slit_func_in
+    slit_func_in = np.interp(np.linspace(0, ny-1, ny), np.arange(nrows), slit_func_in)
+    # normalize 
+    slit_func_in = slit_func_in / np.sum(slit_func_in)
     
     # Call the extract function
     result, sL, sP, model, unc, info, img_mad, img_mad_mask = vectextr.extract(

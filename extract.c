@@ -542,7 +542,7 @@ int xi_zeta_tensors(
                 else
                     w = step;
                 dy += step;
-                delta = slitdeltas[x] * (dy - ycen[x]);
+                delta = slitdeltas[iy];
                 ix1 = delta;
                 ix2 = ix1 + signum(delta);
 
@@ -920,9 +920,9 @@ int extract(int ncols,
     delta_x = lambda_sP == 0 ? 0 : 1;
     for (x = 0; x < ncols; x++)
     {
-        for (y = -y_lower_lim; y < nrows - y_lower_lim + 1; y++)
+        for (iy = 0; iy < ny; iy++)
         {
-            tmp = ceil(fabs(y * slitdeltas[x]));
+            tmp = ceil(fabs(slitdeltas[iy]));
             delta_x = max(delta_x, tmp);
         }
     }
