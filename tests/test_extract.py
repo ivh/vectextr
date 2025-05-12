@@ -47,14 +47,10 @@ def test_extract_basic():
     
     # Slit curve coefficients - all zeros for a straight slit
     # This needs to be updated after loading the image since ncols may have changed
-    slitdeltas = np.zeros(ncols * osample * 3, dtype=np.float64)
+    slitdeltas = np.zeros(ny, dtype=np.float64)
     
-    # Initial slit function (optional)
-    # Create a Gaussian-like initial slit function
-    slit_func_in = np.zeros(ny, dtype=np.float64)
-    for i in range(ny):
-        y_norm = (i - ny/2.0) / (ny/4.0)
-        slit_func_in[i] = np.exp(-y_norm * y_norm / 2.0)
+    # Initial slit function, horizontal median of im
+    slit_func_in = np.median(im, axis=1)
     
     # Call the extract function
     result, sL, sP, model, unc, img_mad, img_mad_mask = vectextr.extract(

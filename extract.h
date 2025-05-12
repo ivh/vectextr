@@ -12,7 +12,7 @@ typedef struct
     double w; /* Contribution weight <= 1/osample */
 } zeta_ref;
 
-int slit_func_curved(int ncols,
+int extract(int ncols,
                      int nrows,
                      int ny,
                      double *im,

@@ -2,7 +2,7 @@
 #include <string.h>
 #include <stdlib.h>
 #include <math.h>
-#include "slit_func_2d_xi_zeta_bd.h"
+#include "extract.h"
 
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
@@ -836,7 +836,7 @@ int xi_zeta_tensors(
     return 0;
 }
 
-int slit_func_curved(int ncols,
+int extract(int ncols,
                      int nrows,
                      int ny,
                      double *im,
