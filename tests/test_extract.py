@@ -53,7 +53,7 @@ def test_extract_basic():
     slit_func_in = np.median(im, axis=1)
     
     # Call the extract function
-    result, sL, sP, model, unc, img_mad, img_mad_mask = vectextr.extract(
+    result, sL, sP, model, unc, info, img_mad, img_mad_mask = vectextr.extract(
         im,
         pix_unc,
         mask,

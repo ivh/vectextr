@@ -37,9 +37,6 @@ int _nd = 0;
 #define MAX_ZETA (MAX_ZETA_X * MAX_ZETA_Y * MAX_ZETA_Z)
 #define MAX_MZETA ((_ncols) * (_nrows))
 #define MAX_XI ((_ncols) * (_ny)*4)
-#define MAX_PSF_X (_ncols)
-#define MAX_PSF_Y (3)
-#define MAX_PSF (MAX_PSF_X * MAX_PSF_Y)
 #define MAX_A ((_n) * (_nd))
 #define MAX_R (_n)
 #define MAX_SP (_ncols)
@@ -85,17 +82,6 @@ static long xi_index(long x, long y, long z)
     if ((i < 0) | (i >= MAX_XI))
     {
         printf("INDEX OUT OF BOUNDS. Xi[%li, %li, %li]\n", x, y, z);
-        return 0;
-    }
-    return i;
-}
-
-static long psf_index(long x, long y)
-{
-    long i = ((x)*3 + (y));
-    if ((i < 0) | (i >= MAX_PSF))
-    {
-        printf("INDEX OUT OF BOUNDS. PSF[%li, %li]\n", x, y);
         return 0;
     }
     return i;
@@ -198,7 +184,6 @@ static long sl_index(long i)
 #define zeta_index(x, y, z) ((z) + (y)*MAX_ZETA_Z + (x)*MAX_ZETA_Z * _nrows)
 #define mzeta_index(x, y) ((y) + (x)*_nrows)
 #define xi_index(x, y, z) ((z) + 4 * (y) + _ny * 4 * (x))
-#define psf_index(x, y) ((x)*3 + (y))
 #define a_index(x, y) ((y)*n + (x))
 #define r_index(i) (i)
 #define sp_index(i) (i)
@@ -393,7 +378,7 @@ int xi_zeta_tensors(
     int *ycen_offset,
     int y_lower_lim,
     int osample,
-    double *PSF_curve,
+    double *slitdeltas,
     xi_ref *xi,
     zeta_ref *zeta,
     int *m_zeta)
@@ -418,11 +403,8 @@ int xi_zeta_tensors(
         Number of detector pixels below the pixel containing the central line ycen
     osample : int
         Subpixel ovsersampling factor
-    PSF_curve : double array of shape (ncols, 3)
-        Parabolic fit to the slit image curvature.
-        For column d_x = PSF_curve[ncols][0] +  PSF_curve[ncols][1] *d_y + PSF_curve[ncols][2] *d_y^2,
-        where d_y is the offset from the central line ycen.
-        Thus central subpixel of omega[x][y'][delta_x][iy'] does not stick out of column x.
+    slitdeltas : double array of shape (ncols,)
+        Slit curvature at each pixel
     xi : (out) xi_ref array of shape (ncols, ny, 4)
         Convolution tensor telling the coordinates of detector
         pixels on which {x, iy} element falls and the corresponding projections.
@@ -531,14 +513,6 @@ int xi_zeta_tensors(
         the focal plane but will deal with it when the necessity will become apparent. For now we
         just assume that a shift delta the weight w assigned to subpixel iy is divided between
         ix1=int(delta) and ix2=int(delta)+signum(delta) as (1-|delta-ix1|)*w and |delta-ix1|*w.
-
-        The curvature is given by a quadratic polynomial evaluated from an approximation for column
-        x: delta = PSF_curve[x][0] + PSF_curve[x][1] * (y-yc[x]) + PSF_curve[x][2] * (y-yc[x])^2.
-        It looks easy except that y and yc are set in the global detector coordinate system rather than
-        in the shifted and cropped swath passed to slit_func_2d. One possible solution I will try here
-        is to modify PSF_curve before the call such as:
-        delta = PSF_curve'[x][0] + PSF_curve'[x][1] * (y'-ycen[x]) + PSF_curve'[x][2] * (y'-ycen[x])^2
-        where y' = y - floor(yc).
         */
 
         /* Define initial distance from ycen       */
@@ -568,7 +542,7 @@ int xi_zeta_tensors(
                 else
                     w = step;
                 dy += step;
-                delta = (PSF_curve[psf_index(x, 1)] + PSF_curve[psf_index(x, 2)] * (dy - ycen[x])) * (dy - ycen[x]);
+                delta = slitdeltas[x] * (dy - ycen[x]);
                 ix1 = delta;
                 ix2 = ix1 + signum(delta);
 
@@ -849,7 +823,7 @@ int extract(int ncols,
                      double lambda_sP,
                      double lambda_sL,
                      int maxiter,
-                     double *PSF_curve,
+                     double *slitdeltas,
                      double *sP,
                      double *sL,
                      double *model,
@@ -869,8 +843,6 @@ int extract(int ncols,
         Swath width in pixels
     nrows : int
         Extraction slit height in pixels
-    nx : int
-        Range of columns affected by PSF tilt: nx = 2 * delta_x + 1
     ny : int
         Size of the slit function array: ny = osample * (nrows + 1) + 1
     im : double array of shape (nrows, ncols)
@@ -893,8 +865,8 @@ int extract(int ncols,
         Smoothing parameter for the spectrum, could be zero
     lambda_sL : double
         Smoothing parameter for the slit function, usually > 0
-    PSF_curve : double array of shape (ncols, 3)
-        Slit curvature parameters for each point along the spectrum
+    slitdeltas : double array of shape (ncols)
+        Slit deltas for each point along the slit
     sP : (out) double array of shape (ncols,)
         Spectrum resulting from decomposition
     sL : (out) double array of shape (ny,)
@@ -950,7 +922,7 @@ int extract(int ncols,
     {
         for (y = -y_lower_lim; y < nrows - y_lower_lim + 1; y++)
         {
-            tmp = ceil(fabs(y * PSF_curve[psf_index(x, 1)] + y * y * PSF_curve[psf_index(x, 2)]));
+            tmp = ceil(fabs(y * slitdeltas[x]));
             delta_x = max(delta_x, tmp);
         }
     }
@@ -981,7 +953,7 @@ int extract(int ncols,
     m_zeta = malloc(MAX_MZETA * sizeof(int));
     diff = malloc(MAX_IM * sizeof(double));
 
-    xi_zeta_tensors(ncols, nrows, ny, ycen, ycen_offset, y_lower_lim, osample, PSF_curve, xi, zeta, m_zeta);
+    xi_zeta_tensors(ncols, nrows, ny, ycen, ycen_offset, y_lower_lim, osample, slitdeltas, xi, zeta, m_zeta);
 
     /* Loop through sL , sP reconstruction until convergence is reached */
     iter = 0;
