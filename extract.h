@@ -41,7 +41,6 @@ int bandsol(
     double      lambda);
 
 int extract(
-        double      error_factor,
         int         ncols,
         int         nrows,
         int         osample,

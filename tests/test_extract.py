@@ -17,7 +17,7 @@ def test_extract_basic():
     osample = 2
     delta_x = 1
     y_lower_lim = 2
-    error_factor = 1.0
+
     lambda_sP = 0.1
     lambda_sL = 0.1
     sP_stop = 1e-3
@@ -51,7 +51,6 @@ def test_extract_basic():
     
     # Call the extract function
     result, sL, sP, model, unc, img_mad, img_mad_mask = vectextr.extract(
-        error_factor,
         im,
         pix_unc,
         mask,

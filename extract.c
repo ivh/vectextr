@@ -668,7 +668,7 @@ int xi_zeta_tensors(
 /*----------------------------------------------------------------------------*/
 /**
   @brief    Slit decomposition of single swath with slit tilt & curvature
-  @param error_factor Factor for error scaling
+
   @param ncols      Swath width in pixels
   @param nrows      Extraction slit height in pixels
   @param osample    Subpixel oversampling factor
@@ -694,7 +694,6 @@ int xi_zeta_tensors(
  */
 /*----------------------------------------------------------------------------*/
 int extract(
-        double      error_factor,
         int         ncols,
         int         nrows,
         int         osample,
@@ -1085,14 +1084,14 @@ int extract(
             if (msum != 0){
                 // This can give NaNs if m/sum is less than zero, i.e. low/no flux
                 // due to ignoring background flux.
-                unc[x] = sqrt(fabs(sP[x]) * fabs(sum) / fabs(msum) / error_factor);
+                unc[x] = sqrt(fabs(sP[x]) * fabs(sum) / fabs(msum));
             } else {
                 // Fix bad value to NaN as Phase3 doesn't allow Inf.
                 unc[x] = NAN;
             }
         }
     */
-    if (error_factor == -1)
+    if (0)
     {
         // Uncertainty calculation, following Horne 1986.
         for (x = 0; x < ncols; x++)
@@ -1148,7 +1147,7 @@ int extract(
             {
                 // This can give NaNs if m/sum is less than zero, i.e. low/no flux
                 // due to ignoring background flux.
-                unc[x] = sqrt(fabs(sP[x]) * fabs(sum) / fabs(msum) / error_factor);
+                unc[x] = sqrt(fabs(sP[x]) * fabs(sum) / fabs(msum));
             }
             else
             {

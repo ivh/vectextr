@@ -11,7 +11,6 @@ namespace py = pybind11;
 
 // Function to wrap the C extract function to use NumPy arrays
 py::tuple py_extract(
-    double error_factor,
     py::array_t<double> im_py,
     py::array_t<double> pix_unc_py,
     py::array_t<int> mask_py,
@@ -113,7 +112,6 @@ py::tuple py_extract(
     
     // Call the extract function
     int result = extract(
-        error_factor,
         ncols,
         nrows,
         osample,
@@ -185,7 +183,7 @@ PYBIND11_MODULE(vectextr, m) {
     m.doc() = "Python bindings for vectextr's extract function";
     
     m.def("extract", &py_extract, 
-          py::arg("error_factor"),
+
           py::arg("im"),
           py::arg("pix_unc"),
           py::arg("mask"),

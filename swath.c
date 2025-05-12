@@ -13,7 +13,7 @@ int cr2res_extract_slitdec_curved(
     double                  smooth_spec,
     int                     niter,
     double                  kappa,
-    double                  error_factor,
+
     cpl_vector          **  slit_func,
     cpl_bivector        **  spec,
     hdrl_image          **  model)
@@ -439,7 +439,7 @@ int cr2res_extract_slitdec_curved(
         cpl_image_unwrap(img_tmp);
         
         /* Finally ready to call the slit-decomp */
-        cr2res_extract_slit_func_curved(error_factor, swath, height, oversample, 
+        cr2res_extract_slit_func_curved(swath, height, oversample, 
                 img_sw_data, err_sw_data, mask_sw, ycen_sw, ycen_offset_sw, 
                 y_lower_limit, slitcurves_sw, delta_x, slitfu_sw_data, 
                 spec_sw_data, model_sw, unc_sw_data, smooth_spec, smooth_slit, 

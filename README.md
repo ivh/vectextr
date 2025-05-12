@@ -39,7 +39,7 @@ slitdeltas = np.zeros(ncols * osample * 3, dtype=np.float64)
 
 # Extract the spectrum
 result, sL, sP, model, unc, img_mad, img_mad_mask = vectextr.extract(
-    error_factor=1.0,
+
     im=im,
     pix_unc=pix_unc,
     mask=mask,
