@@ -810,25 +810,22 @@ int xi_zeta_tensors(
     return 0;
 }
 
-int extract(int ncols,
-                     int nrows,
-                     int ny,
-                     double *im,
-                     double *pix_unc,
-                     unsigned char *mask,
-                     double *ycen,
-                     int *ycen_offset,
-                     int y_lower_lim,
-                     int osample,
-                     double lambda_sP,
-                     double lambda_sL,
-                     int maxiter,
-                     double *slitdeltas,
-                     double *sP,
-                     double *sL,
-                     double *model,
-                     double *unc,
-                     double *info)
+int extract(        int ncols,
+                    int nrows,
+                    double *im,
+                    double *pix_unc,
+                    unsigned char *mask,
+                    double *ycen,
+                    double *slitdeltas,
+                    int osample,
+                    double lambda_sP,
+                    double lambda_sL,
+                    int maxiter,
+                    double *sP,
+                    double *sL,
+                    double *model,
+                    double *unc,
+                    double *info)
 {
     /*
     Extract the spectrum and slit illumination function for a curved slit
@@ -843,8 +840,6 @@ int extract(int ncols,
         Swath width in pixels
     nrows : int
         Extraction slit height in pixels
-    ny : int
-        Size of the slit function array: ny = osample * (nrows + 1) + 1
     im : double array of shape (nrows, ncols)
         Image to be decomposed
     pix_unc : double array of shape (nrows, ncols)
@@ -854,19 +849,14 @@ int extract(int ncols,
     ycen : double array of shape (ncols,)
         Order centre line offset from pixel row boundary.
         Should only contain values between 0 and 1.
-    ycen_offset : int array of shape (ncols,)
-        Order image column shift
-    y_lower_lim : int
-        Number of detector pixels below the pixel containing
-        the central line yc.
+    slitdeltas : double array of shape (nrows, ncols)
+        Slit deltas for each point along the slit
     osample : int
         Subpixel ovsersampling factor
     lambda_sP : double
         Smoothing parameter for the spectrum, could be zero
     lambda_sL : double
         Smoothing parameter for the slit function, usually > 0
-    slitdeltas : double array of shape (ncols)
-        Slit deltas for each point along the slit
     sP : (out) double array of shape (ncols,)
         Spectrum resulting from decomposition
     sL : (out) double array of shape (ny,)
@@ -887,6 +877,8 @@ int extract(int ncols,
     double cost_old, ftol, tmp;
     int iter, delta_x;
     unsigned int isum;
+    int *ycen_offset;
+    int y_lower_lim;
 
     // For the solving of the equation system
     double *l_Aij, *l_bj, *p_Aij, *p_bj;
@@ -901,7 +893,7 @@ int extract(int ncols,
     double success, status, cost;
 
     // maxiter = 20; // Maximum number of iterations
-    ftol = 1e-7;  // Maximum cost difference between two iterations to stop convergence
+    ftol = 1e-6;  // Maximum cost difference between two iterations to stop convergence
     success = 1;
     status = 0;
 
