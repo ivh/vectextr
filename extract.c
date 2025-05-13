@@ -872,7 +872,7 @@ int extract(        int ncols,
     code : int
         0 on success, -1 on failure (see also bandsol)
     */
-    int x, xx, xxx, y, yy, iy, jy, n, m, nx;
+    int x, xx, xxx, y, yy, iy, jy, n, m, nx, ny;
     double norm, dev, lambda, diag_tot, ww, www;
     double cost_old, ftol, tmp;
     int iter, delta_x;

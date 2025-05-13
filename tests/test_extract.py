@@ -15,14 +15,10 @@ def test_extract_basic():
     """
     # Define test parameters
     osample = 6
-    delta_x = 1
-    y_lower_lim = 2
 
     lambda_sP = 0.0
     lambda_sL = 2.0
-    sP_stop = 1e-3
     maxiter = 10
-    kappa = 5.0
     
     # Load the FITS file data
     fits_file = '/Users/tom/vectextr/debug_img_sw_2.fits'
@@ -63,16 +59,11 @@ def test_extract_basic():
         pix_unc,
         mask,
         ycen,
-        ycen_offset,
-        y_lower_lim,
         slitdeltas,
-        delta_x,
         osample,
         lambda_sP,
         lambda_sL,
-        sP_stop,
         maxiter,
-        kappa,
         slit_func_in
     )
     
