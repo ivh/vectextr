@@ -56,7 +56,7 @@ def test_extract_basic():
     slit_func_in = np.interp(np.linspace(0, ny-1, ny), np.arange(nrows), slit_func_in)
     # normalize 
     slit_func_in = slit_func_in / np.sum(slit_func_in)
-    
+    print(slit_func_in)
     # Call the extract function
     result, sL, sP, model, unc, info, img_mad, img_mad_mask = vectextr.extract(
         im,
@@ -89,6 +89,7 @@ def test_extract_basic():
     
     # Check that slit function is normalized
     slit_integral = np.sum(sL) / osample
+    print(slit_integral)
     assert abs(slit_integral - 1.0) < 0.1, "Slit function should be normalized"
     
     # Check that model reproduces data reasonably well
