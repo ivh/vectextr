@@ -10,6 +10,10 @@
 int debug_output(int ncols, int nrows, int osample, double *im, 
                  double *pix_unc, int *mask, double *ycen, 
                  int *ycen_offset, int y_lower_lim, double *slitdeltas) {
+    /* Prevent unused parameter warnings */
+    (void)ncols; (void)nrows; (void)osample; (void)im;
+    (void)pix_unc; (void)mask; (void)ycen;
+    (void)ycen_offset; (void)y_lower_lim; (void)slitdeltas;
     printf("Debug output called. This is a stub function for testing.\n");
     return 0;
 }
@@ -79,6 +83,8 @@ int test_memory_only(void) {
 }
 
 int main(int argc, char *argv[]) {
+    /* Prevent unused parameter warnings */
+    (void)argc; (void)argv;
     /* Run a simple memory allocation/deallocation test */
     if (test_memory_only() != 0) {
         printf("Memory test failed!\n");
