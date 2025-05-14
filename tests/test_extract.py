@@ -16,6 +16,7 @@ def test_extract_basic():
     # Define test parameters
     osample = 6
 
+
     lambda_sP = 0.0
     lambda_sL = 2.0
     maxiter = 10

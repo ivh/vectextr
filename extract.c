@@ -878,7 +878,7 @@ int extract(        int ncols,
     int iter, delta_x;
     unsigned int isum;
     int *ycen_offset;
-    int y_lower_lim;
+    int y_lower_lim = nrows / 2;
 
     // For the solving of the equation system
     double *l_Aij, *l_bj, *p_Aij, *p_bj;
@@ -912,7 +912,7 @@ int extract(        int ncols,
     delta_x = lambda_sP == 0 ? 0 : 1;
     for (x = 0; x < ncols; x++)
     {
-        for (iy = 0; iy < ny; iy++)
+        for (iy = 0; iy < nrows; iy++)
         {
             tmp = ceil(fabs(slitdeltas[iy]));
             delta_x = max(delta_x, tmp);
@@ -944,7 +944,15 @@ int extract(        int ncols,
     zeta = malloc(MAX_ZETA * sizeof(zeta_ref));
     m_zeta = malloc(MAX_MZETA * sizeof(int));
     diff = malloc(MAX_IM * sizeof(double));
+    ycen_offset = malloc(ncols * sizeof(int));
 
+    // remove integer values from ycen, put into ycen_offset
+    for (x = 0; x < ncols; x++)
+    {
+        ycen_offset[x] = ycen[x];
+        ycen[x] = ycen[x] - ycen_offset[x];
+    }
+    
     xi_zeta_tensors(ncols, nrows, ny, ycen, ycen_offset, y_lower_lim, osample, slitdeltas, xi, zeta, m_zeta);
 
     /* Loop through sL , sP reconstruction until convergence is reached */
