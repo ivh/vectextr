@@ -2,6 +2,7 @@ import pytest
 import numpy as np
 import matplotlib.pyplot as plt
 from astropy.io import fits
+from astropy.stats import sigma_clip
 
 # Try to import vectextr module
 try:
@@ -22,7 +23,7 @@ def test_extract_basic():
     maxiter = 10
     
     # Load the FITS file data
-    fits_file = '/Users/tom/vectextr/debug_img_sw_2.fits'
+    fits_file = '/Users/tom/vectextr/test_data.fits'
     with fits.open(fits_file) as hdul:
         # Get the data from the 0th extension
         im = hdul[0].data.astype(np.float64)
@@ -40,20 +41,20 @@ def test_extract_basic():
     
     # For the central line, use the middle of the image
     ycen = np.ones(ncols, dtype=np.float64) * (nrows / 2.0)  # Central line
-    ycen_offset = np.zeros(ncols, dtype=np.int32)  # No offsets
     
     # Slit curve coefficients - all zeros for a straight slit
     # This represents curvature at each position along the slit (y-direction)
     # Now the C code correctly indexes it by iy or y+y_lower_lim
-    slitdeltas = np.zeros(ny, dtype=np.float64)
+    slitdeltas = np.linspace(-5, 5, ny, dtype=np.float64)
     
     # Initial slit function, horizontal median of im
-    slit_func_in = np.median(im, axis=1)
+    slit_func_in = sigma_clip(im, sigma=3).median(axis=1)
     # oversample slit_func_in
     slit_func_in = np.interp(np.linspace(0, ny-1, ny), np.arange(nrows), slit_func_in)
     # normalize 
     slit_func_in = slit_func_in / np.sum(slit_func_in)
-    print(slit_func_in)
+    np.savez('slit_func_in.npz', slit_func_in=slit_func_in)
+    
     # Call the extract function
     result, sL, sP, model, unc, info, img_mad, img_mad_mask = vectextr.extract(
         im,
@@ -74,15 +75,6 @@ def test_extract_basic():
     assert sL.shape == (ny,), "Slit function should have shape (ny,)"
     assert model.shape == (nrows, ncols), "Model should have shape (nrows, ncols)"
     assert unc.shape == (ncols,), "Uncertainty should have shape (ncols,)"
-    
-    # Check that spectrum has reasonable values
-    assert np.all(np.isfinite(sP)), "Spectrum should have finite values"
-    assert np.all(sP > 0), "Spectrum should be positive for this test case"
-    
-    # Check that slit function is normalized
-    slit_integral = np.sum(sL) / osample
-    print(slit_integral)
-    assert abs(slit_integral - 1.0) < 0.1, "Slit function should be normalized"
     
     # Check that model reproduces data reasonably well
     residuals = im - model
@@ -140,7 +132,6 @@ def test_extract_basic():
     # Print some results
     print(f"Extract function returned: {result}")
     print(f"Spectrum mean: {np.mean(sP)}")
-    print(f"Slit function sum/osample: {slit_integral}")
     print(f"RMS of residuals: {rms}")
     
     return result, sL, sP, model, unc

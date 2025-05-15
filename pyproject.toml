@@ -24,7 +24,7 @@ dev = [
 
 [tool.scikit-build]
 wheel.packages = []
-cmake.build-type = "Release"
+cmake.build-type = "Debug"
 cmake.define = {}
 wheel.expand-macos-universal-tags = true
 

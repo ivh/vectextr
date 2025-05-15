@@ -24,7 +24,7 @@ target_compile_features(vectextr PRIVATE cxx_std_11)
 if(MSVC)
     target_compile_options(vectextr PRIVATE /W4)
 else()
-    target_compile_options(vectextr PRIVATE -Wall -Wextra)
+    target_compile_options(vectextr PRIVATE -Wall -Wextra -DDEBUG)
 endif()
 
 # Install the extension

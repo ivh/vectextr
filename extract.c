@@ -7,7 +7,9 @@
 #define min(a, b) (((a) < (b)) ? (a) : (b))
 #define max(a, b) (((a) > (b)) ? (a) : (b))
 #define signum(a) (((a) > 0) ? 1 : ((a) < 0) ? -1 : 0)
+#ifndef DEBUG
 #define DEBUG 0
+#endif
 
 // Store important sizes in global variables to make access easier
 // When calculating the proper indices
@@ -893,7 +895,7 @@ int extract(        int ncols,
     double success, status, cost;
 
     // maxiter = 20; // Maximum number of iterations
-    ftol = 1e-6;  // Maximum cost difference between two iterations to stop convergence
+    ftol = 1e-7;  // Maximum cost difference between two iterations to stop convergence
     success = 1;
     status = 0;
 
@@ -905,6 +907,7 @@ int extract(        int ncols,
     _nrows = nrows;
     _ny = ny;
     _osample = osample;
+    printf("ncols: %d, nrows: %d, ny: %d, osample: %d\n", _ncols, _nrows, _ny, _osample);
 #endif
 
     // If we want to smooth the spectrum we need at least delta_x = 1
