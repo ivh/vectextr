@@ -42,7 +42,7 @@ shift_end = 5.0  # End shift at +5 pixels
 np.random.seed(42)
 
 # Function to create test data
-def create_test_data(with_shift=True, with_row_scaling=True, with_discontinuous_shifts=False):
+def create_test_data(with_shift=True, with_row_scaling=True, with_discontinuous_shifts=False, custom_deltas=None):
     # Initialize data array
     data = np.zeros((rows, cols))
     
@@ -52,17 +52,21 @@ def create_test_data(with_shift=True, with_row_scaling=True, with_discontinuous_
     for row in range(rows):
         # Calculate peak centers for this row
         if with_shift:
-            # Apply shift from -5 to +5 pixels across all rows
-            current_shift = shift_start + (row / (rows - 1)) * (shift_end - shift_start)
-            
-            # Apply additional discontinuous shifts if requested
-            if with_discontinuous_shifts:
-                if row >= 60:
-                    # Rows 60-100: shift by additional 8 pixels left (negative)
-                    current_shift -= 8.0
-                elif row >= 30:
-                    # Rows 30-59: shift by additional 4 pixels left (negative)
-                    current_shift -= 4.0
+            if custom_deltas is not None:
+                # Use provided custom delta values
+                current_shift = custom_deltas[row]
+            else:
+                # Apply shift from -5 to +5 pixels across all rows
+                current_shift = shift_start + (row / (rows - 1)) * (shift_end - shift_start)
+                
+                # Apply additional discontinuous shifts if requested
+                if with_discontinuous_shifts:
+                    if row >= 60:
+                        # Rows 60-100: shift by additional 8 pixels left (negative)
+                        current_shift -= 8.0
+                    elif row >= 30:
+                        # Rows 30-59: shift by additional 4 pixels left (negative)
+                        current_shift -= 4.0
             
             peak1_center = peak1_center_init + current_shift
             peak2_center = peak2_center_init + current_shift
@@ -100,12 +104,50 @@ def create_test_data(with_shift=True, with_row_scaling=True, with_discontinuous_
     
     return data
 
+# Function to generate continuous multi-slope shifts
+def create_continuous_multislope_shifts(slopes=[0.05, -0.15, 0.11], row_ranges=[(0, 29), (30, 59), (60, 99)]):
+    # Initialize array for all delta values
+    all_deltas = np.zeros(rows)
+    
+    # Starting position - we'll start at 0
+    current_pos = 0.0
+    
+    # For each segment
+    for i, ((start_row, end_row), slope) in enumerate(zip(row_ranges, slopes)):
+        # Number of rows in this segment
+        segment_rows = end_row - start_row + 1
+        
+        # Generate deltas for this segment
+        segment_deltas = np.zeros(segment_rows)
+        
+        # Fill the segment with cumulative slope values
+        for j in range(segment_rows):
+            segment_deltas[j] = current_pos + j * slope
+        
+        # Update the starting position for the next segment to maintain continuity
+        current_pos = segment_deltas[-1] + slope
+        
+        # Store in the main array
+        all_deltas[start_row:end_row+1] = segment_deltas
+    
+    return all_deltas
+
 # Create all data versions
 shifted_data = create_test_data(with_shift=True, with_row_scaling=True)
 unshifted_data = create_test_data(with_shift=False, with_row_scaling=True)
 
-# Create new variant with discontinuous shifts
+# Create variant with discontinuous shifts
 discontinuous_data = create_test_data(with_shift=True, with_row_scaling=True, with_discontinuous_shifts=True)
+
+# Create multislope variant with continuous transitions
+# Generate the deltas with the specified slopes
+multislope_deltas = create_continuous_multislope_shifts(
+    slopes=[0.05, -0.15, 0.11],
+    row_ranges=[(0, 29), (30, 59), (60, 99)]
+)
+
+# Save the delta values to an npz file
+np.savez('multislope_deltas.npz', deltas=multislope_deltas)
 
 # Save shifted data to FITS file
 hdu_shifted = fits.PrimaryHDU(shifted_data)
@@ -144,6 +186,14 @@ hdul_discontinuous = fits.HDUList([hdu_discontinuous])
 output_file_discontinuous = 'test_data_discontinuous.fits'
 hdul_discontinuous.writeto(output_file_discontinuous, overwrite=True)
 print(f"Created FITS file with discontinuous shifts: {output_file_discontinuous}")
+
+# Create and save the multislope variant
+multislope_data = create_test_data(with_shift=True, with_row_scaling=True, custom_deltas=multislope_deltas)
+hdu_multislope = fits.PrimaryHDU(multislope_data)
+hdul_multislope = fits.HDUList([hdu_multislope])
+output_file_multislope = 'test_data_multislope.fits'
+hdul_multislope.writeto(output_file_multislope, overwrite=True)
+print(f"Created FITS file with continuous multislope shifts: {output_file_multislope}")
 
 # Create a comparison plot showing row scaling and peak shifts
 plt.figure(figsize=(15, 15))
@@ -260,13 +310,15 @@ plt.close()
 
 print("Created comparison preview image: test_data_all_versions.png")
 print(f"Data shape: {shifted_data.shape}")
-print(f"Generated five versions of test data:")
+print(f"Generated six versions of test data:")
 print(f"  1. Shifted peaks with row scaling: test_data_shifted.fits")
 print(f"  2. Fixed peaks with row scaling: test_data_unshifted.fits")
 print(f"  3. Shifted peaks without row scaling: test_data_shifted_flat.fits")
 print(f"  4. Fixed peaks without row scaling: test_data_unshifted_flat.fits")
 print(f"  5. Peaks with discontinuous shifts at rows 30 and 60: test_data_discontinuous.fits")
+print(f"  6. Peaks with continuous multislope shifts: test_data_multislope.fits")
 print(f"All versions have same noise characteristics and peak amplitudes")
+print(f"Delta values for the multislope variant saved to: multislope_deltas.npz")
 
 # Also create a symbolic link to match the name used in previous tests
 import os

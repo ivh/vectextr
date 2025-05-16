@@ -197,6 +197,7 @@ if __name__ == "__main__":
     if len(sys.argv) > 1 and sys.argv[1] == "--single-test":
         fname = sys.argv[2]
         slope = float(sys.argv[3]) if sys.argv[3] != "None" else None
+        
         # Handle the discontinuous slitdeltas case specially
         if fname.endswith('discontinuous.fits'):
             slitdeltas = np.concatenate([
@@ -205,6 +206,12 @@ if __name__ == "__main__":
                 np.linspace(-5, 5, 100)[60:] - 8.0             # Rows 60-99: Extra 8 pixel left shift
             ])
             run_single_test(fname=fname, slitdeltas=slitdeltas)
+        # Handle the multislope case with continuous transitions
+        elif fname.endswith('multislope.fits'):
+            # Load the pre-computed deltas from the NPZ file
+            multislope_data = np.load('multislope_deltas.npz')
+            deltas = multislope_data['deltas']
+            run_single_test(fname=fname, slitdeltas=deltas)
         else:
             run_single_test(fname=fname, slope=slope)
         sys.exit(0)
@@ -221,6 +228,10 @@ if __name__ == "__main__":
         },
         {
             'fname': '/Users/tom/vectextr/test_data_discontinuous.fits',
+            'slope': None  # Will be handled specially in subprocess
+        },
+        {
+            'fname': '/Users/tom/vectextr/test_data_multislope.fits',
             'slope': None  # Will be handled specially in subprocess
         }
     ]
