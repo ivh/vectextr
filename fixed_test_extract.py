@@ -14,11 +14,11 @@ def test_extract_basic(fname, slope=None, slitdeltas=None):
     Basic test for the extract function with a simple Gaussian-like pattern
     """
     # Define test parameters
-    osample = 6
+    osample = 10
     
     # Add regularization for spectrum to improve numerical stability
     lambda_sP = 0.0
-    lambda_sL = 5.0
+    lambda_sL = 2.0
     maxiter = 20
     
     # Load the FITS file data
@@ -93,8 +93,7 @@ def test_extract_basic(fname, slope=None, slitdeltas=None):
     plt.ylabel('Row')
     
     # Plot slitdeltas on the input image
-    # Use a reference column (80) and calculate the trace line
-    ref_col = 80
+    ref_col = int(ncols/2)
     if 0 <= ref_col < ncols:
         # Downsample the slitdeltas to match image rows
         y_trace = np.linspace(0, nrows-1, nrows)
@@ -126,9 +125,8 @@ def test_extract_basic(fname, slope=None, slitdeltas=None):
     
     # Residuals
     plt.subplot(3, 2, 5)
-    p10 = np.nanpercentile(residuals, 3)
-    p90 = np.nanpercentile(residuals, 97)
-    plt.imshow(residuals, origin='lower', aspect='auto', cmap='RdBu_r', vmin=p10, vmax=p90)
+    vmax = np.maximum(np.abs(np.nanpercentile(residuals, 3)), np.nanpercentile(residuals, 97))
+    plt.imshow(residuals, origin='lower', aspect='auto', cmap='RdBu_r', vmin=-vmax, vmax=vmax)
     plt.colorbar(label='Residual Flux')
     plt.title(f'Residuals (Data - Model), RMS: {rms:.4f}')
     plt.xlabel('Column')
@@ -212,6 +210,14 @@ if __name__ == "__main__":
             multislope_data = np.load('multislope_deltas.npz')
             deltas = multislope_data['deltas']
             run_single_test(fname=fname, slitdeltas=deltas)
+        # Handle any data file with computed slitdeltas from make_slitdeltas.py
+        elif os.path.exists(f'slitdeltas_{os.path.basename(fname).replace(".fits", "")}.npz'):
+            # Load slitdeltas computed by make_slitdeltas.py
+            npz_file = f'slitdeltas_{os.path.basename(fname).replace(".fits", "")}.npz'
+            print(f"Loading slitdeltas from {npz_file}")
+            slitdeltas_data = np.load(npz_file)
+            deltas = slitdeltas_data['median_offsets']
+            run_single_test(fname=fname, slitdeltas=deltas)
         else:
             run_single_test(fname=fname, slope=slope)
         sys.exit(0)
@@ -233,10 +239,18 @@ if __name__ == "__main__":
         {
             'fname': '/Users/tom/vectextr/test_data_multislope.fits',
             'slope': None  # Will be handled specially in subprocess
+        },
+        {
+            'fname': '/Users/tom/vectextr/test_data_Rsim.fits',
+            'slope': None  # Will use slitdeltas from NPZ file
+        },
+        {
+            'fname': '/Users/tom/vectextr/test_data_Hsim.fits',
+            'slope': None  # Will use slitdeltas from NPZ file
         }
     ]
     
-    for dataset in datasets[-2:]:
+    for dataset in datasets[-1:]:
         print(f"\n===== Testing {dataset['fname']} =====")
         cmd = [sys.executable, __file__, "--single-test", dataset['fname'], str(dataset['slope'])]
         try:
