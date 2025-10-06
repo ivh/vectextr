@@ -1,3 +1,11 @@
+#manually added
+goodplots/
+slitdelta_plots/
+slitdeltas_*
+test_data*.fits
+multislope_deltas.npz
+slit_func_in.npz
+
 # Compiled object files
 *.o
 *.obj
@@ -46,8 +54,3 @@ dist/
 .installed.cfg
 *.egg
 
-# Python environment and package files
-venv/
-env/
-uv.lock
-.windsurf
