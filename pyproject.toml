@@ -1,12 +1,11 @@
 [build-system]
-requires = ["scikit-build-core>=0.7.0", "pybind11>=2.11.1", "numpy"]
-build-backend = "scikit_build_core.build"
+requires = ["hatchling", "nanobind"]
+build-backend = "hatchling.build"
 
 [project]
 name = "vectextr"
 version = "0.1.0"
 description = "Python wrapper for the vectextr C library"
-readme = "README.md"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.20.0",
@@ -21,13 +20,20 @@ test = [
 ]
 dev = [
     "pytest>=7.0.0",
+    "nanobind",
 ]
 
-[tool.scikit-build]
-wheel.packages = []
-cmake.build-type = "Debug"
-cmake.define = {}
-wheel.expand-macos-universal-tags = true
+[tool.hatch.build]
+exclude = [
+    "*.npz",
+    "*.fits",
+    "goodplots/",
+    "slitdelta_plots/",
+    "build/",
+    ".git/",
+]
+
+[tool.hatch.build.targets.wheel.hooks.custom]
 
 [tool.pytest.ini_options]
 testpaths = ["tests"]
