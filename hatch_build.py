@@ -90,8 +90,9 @@ class CustomBuildHook(BuildHookInterface):
 
         build_data["force_include"][output] = output
 
-        # Create __init__.py
+        # Create __init__.py only if it doesn't exist
         init_file = Path("__init__.py")
-        init_content = "from .charslit import *\n"
-        init_file.write_text(init_content)
+        if not init_file.exists():
+            init_content = 'from .charslit import extract\n\n__all__ = ["extract"]\n'
+            init_file.write_text(init_content)
         build_data["force_include"]["__init__.py"] = "__init__.py"
