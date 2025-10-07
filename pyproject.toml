@@ -26,6 +26,8 @@ test = [
 dev = [
     "pytest>=7.0.0",
     "nanobind",
+    "pre-commit>=3.0.0",
+    "ruff>=0.8.0",
 ]
 
 [tool.hatch.build]
