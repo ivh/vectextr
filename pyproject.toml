@@ -15,6 +15,11 @@ dependencies = [
 ]
 
 [project.optional-dependencies]
+dev = [
+    "nanobind",
+]
+
+[dependency-groups]
 test = [
     "pytest>=7.0.0",
 ]

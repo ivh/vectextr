@@ -563,6 +563,11 @@ dependencies = [
 [package.optional-dependencies]
 dev = [
     { name = "nanobind" },
+]
+
+[package.dev-dependencies]
+dev = [
+    { name = "nanobind" },
     { name = "pytest" },
 ]
 test = [
@@ -575,8 +580,13 @@ requires-dist = [
     { name = "matplotlib", specifier = ">=3.5.0" },
     { name = "nanobind", marker = "extra == 'dev'" },
     { name = "numpy", specifier = ">=1.20.0" },
-    { name = "pytest", marker = "extra == 'dev'", specifier = ">=7.0.0" },
-    { name = "pytest", marker = "extra == 'test'", specifier = ">=7.0.0" },
     { name = "scipy", specifier = ">=1.7.0" },
 ]
-provides-extras = ["test", "dev"]
+provides-extras = ["dev"]
+
+[package.metadata.requires-dev]
+dev = [
+    { name = "nanobind" },
+    { name = "pytest", specifier = ">=7.0.0" },
+]
+test = [{ name = "pytest", specifier = ">=7.0.0" }]
