@@ -1,1 +1,1 @@
-from .vectextr import *  # noqa: F403
+from .charslit import *  # noqa: F403, F401

@@ -20,7 +20,7 @@ TEST_TARGET = $(BUILD_DIR)/extract_test
 PYTHON_WRAPPER = $(PYTHON_DIR)/extract_wrapper.cpp
 
 # Library target
-LIB_TARGET = $(LIB_DIR)/libvectextr.a
+LIB_TARGET = $(LIB_DIR)/libcharslit.a
 OBJECTS = $(patsubst $(SRC_DIR)/%.c,$(BUILD_DIR)/%.o,$(SRC_FILES))
 TEST_OBJECTS = $(patsubst $(TEST_DIR)/%.c,$(BUILD_DIR)/%.o,$(TEST_SRC))
 
@@ -48,7 +48,7 @@ $(BUILD_DIR)/%.o: $(SRC_DIR)/%.c
 # Compile test program
 $(TEST_TARGET): $(TEST_OBJECTS) $(LIB_TARGET)
 	@echo "Linking test program $@"
-	@$(CC) $(CFLAGS) -o $@ $(TEST_OBJECTS) -L$(LIB_DIR) -lvectextr $(LDFLAGS)
+	@$(CC) $(CFLAGS) -o $@ $(TEST_OBJECTS) -L$(LIB_DIR) -lcharslit $(LDFLAGS)
 
 # Compile test object files
 $(BUILD_DIR)/%.o: $(TEST_DIR)/%.c

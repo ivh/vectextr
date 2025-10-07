@@ -3,9 +3,9 @@ requires = ["hatchling", "nanobind"]
 build-backend = "hatchling.build"
 
 [project]
-name = "vectextr"
+name = "charslit"
 version = "0.1.0"
-description = "Python wrapper for the vectextr C library"
+description = "CharSlit: Python wrapper for characterized slit spectral extraction"
 requires-python = ">=3.11"
 dependencies = [
     "numpy>=1.20.0",

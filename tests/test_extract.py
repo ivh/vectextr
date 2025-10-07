@@ -5,17 +5,17 @@ from astropy.io import fits
 from astropy.stats import sigma_clip
 import os
 
-# Try to import vectextr module
+# Try to import charslit module
 try:
-    import vectextr
+    import charslit
 except ImportError:
-    pytest.skip("vectextr module not installed", allow_module_level=True)
+    pytest.skip("charslit module not installed", allow_module_level=True)
 
 
 @pytest.fixture
 def default_datasets():
     """Fixture providing the default list of test datasets from fixed_test_extract.py"""
-    base_dir = "/Users/tom/vectextr"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     return [
         {
             "name": "unshifted",
@@ -62,7 +62,8 @@ def test_extract_basic():
     maxiter = 10
 
     # Load the FITS file data
-    fits_file = "/Users/tom/vectextr/test_data.fits"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    fits_file = os.path.join(base_dir, "test_data.fits")
     with fits.open(fits_file) as hdul:
         # Get the data from the 0th extension
         im = hdul[0].data.astype(np.float64)
@@ -95,7 +96,7 @@ def test_extract_basic():
     np.savez("slit_func_in.npz", slit_func_in=slit_func_in)
 
     # Call the extract function
-    result, sL, sP, model, unc, info, img_mad, img_mad_mask = vectextr.extract(
+    result, sL, sP, model, unc, info, img_mad, img_mad_mask = charslit.extract(
         im,
         pix_unc,
         mask,
@@ -158,7 +159,7 @@ def test_extract_basic():
     plt.tight_layout()
 
     # Save the figure to a file instead of showing it
-    output_file = "vectextr_visualization.png"
+    output_file = "charslit_visualization.png"
     plt.savefig(output_file, dpi=150)
     print(f"Visualization saved to {output_file}")
 
@@ -263,7 +264,7 @@ def test_extract_with_file(default_datasets, fits_file, slitchar_file, request):
         slit_func_in = slit_func_in / np.sum(slit_func_in)
 
         # Call the extract function
-        result, sL, sP, model, unc, info, img_mad, img_mad_mask = vectextr.extract(
+        result, sL, sP, model, unc, info, img_mad, img_mad_mask = charslit.extract(
             im,
             pix_unc,
             mask,

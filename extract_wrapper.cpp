@@ -135,8 +135,8 @@ nb::tuple extract_wrapper(
     );
 }
 
-NB_MODULE(vectextr, m) {
-    m.doc() = "Python wrapper for the vectextr C library";
+NB_MODULE(charslit, m) {
+    m.doc() = "CharSlit: Python wrapper for characterized slit spectral extraction";
 
     m.def("extract", &extract_wrapper,
         "im"_a,

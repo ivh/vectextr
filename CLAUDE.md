@@ -39,12 +39,12 @@ uv run pytest
 uv build
 
 # For development: rebuild C/C++ extensions after code changes
-uv sync --reinstall-package vectextr
+uv sync --reinstall-package charslit
 ```
 
 **IMPORTANT:** The package is installed in editable mode by `uv sync`. However:
 - **Python code changes** are picked up automatically (no rebuild needed)
-- **C/C++ code changes** require `uv sync --reinstall-package vectextr` to recompile the extension
+- **C/C++ code changes** require `uv sync --reinstall-package charslit` to recompile the extension
 
 **Note:** See "Release Process" section below for publishing to PyPI.
 
@@ -74,5 +74,5 @@ uv run pre-commit run --all-files
 - Always use `uv run` for Python commands to ensure correct environment
 - Pre-commit hooks enforce code quality (runs Ruff automatically)
 - The C extensions must compile successfully for extraction to work
-- After modifying C/C++ code, use `uv sync --reinstall-package vectextr` to rebuild
+- After modifying C/C++ code, use `uv sync --reinstall-package charslit` to rebuild
 - Do not commit changes without asking unless you are sure this is intended. NEVER push until asked explicitly.

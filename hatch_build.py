@@ -48,7 +48,7 @@ class CustomBuildHook(BuildHookInterface):
 
         # Now compile and link the C++ wrapper with the C object
         cxx_compiler = os.environ.get("CXX", "c++")
-        output = f"vectextr{ext_suffix}"
+        output = f"charslit{ext_suffix}"
 
         cxx_compile_cmd = [
             cxx_compiler,
@@ -92,6 +92,6 @@ class CustomBuildHook(BuildHookInterface):
 
         # Create __init__.py
         init_file = Path("__init__.py")
-        init_content = "from .vectextr import *\n"
+        init_content = "from .charslit import *\n"
         init_file.write_text(init_content)
         build_data["force_include"]["__init__.py"] = "__init__.py"

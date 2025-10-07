@@ -3,11 +3,11 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.stats import sigma_clip
 
-# Try to import vectextr module
+# Try to import charslit module
 try:
-    import vectextr
+    import charslit
 except ImportError:
-    raise ImportError("vectextr module not installed")
+    raise ImportError("charslit module not installed")
 
 
 def test_extract_basic(fname, slope=None, slitdeltas=None):
@@ -66,7 +66,7 @@ def test_extract_basic(fname, slope=None, slitdeltas=None):
 
     # Call the extract function with error handling
     try:
-        result, sL, sP, model, unc, info, img_mad, img_mad_mask = vectextr.extract(
+        result, sL, sP, model, unc, info, img_mad, img_mad_mask = charslit.extract(
             im,
             pix_unc,
             mask,
@@ -247,8 +247,8 @@ if __name__ == "__main__":
 
     # Main process - run each test in a separate subprocess
     datasets = [
-        {"fname": "/Users/tom/vectextr/test_data_unshifted.fits", "slope": 0.0},
-        {"fname": "/Users/tom/vectextr/test_data_shifted.fits", "slope": 0.1},
+        {"fname": "/Users/tom/charslit/test_data_unshifted.fits", "slope": 0.0},
+        {"fname": "/Users/tom/charslit/test_data_shifted.fits", "slope": 0.1},
         {
             "fname": "/Users/tom/vectextr/test_data_discontinuous.fits",
             "slope": None,  # Will be handled specially in subprocess
