@@ -1,1 +1,1 @@
-from .vectextr import *
+from .vectextr import *  # noqa: F403
