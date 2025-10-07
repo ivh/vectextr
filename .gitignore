@@ -5,6 +5,7 @@ slitdeltas_*
 test_data*.fits
 multislope_deltas.npz
 slit_func_in.npz
+*png
 
 # Compiled object files
 *.o
