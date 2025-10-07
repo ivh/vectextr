@@ -19,6 +19,9 @@ dev = [
     "nanobind",
 ]
 
+[project.scripts]
+pytest = "pytest:console_main"
+
 [dependency-groups]
 test = [
     "pytest>=7.0.0",

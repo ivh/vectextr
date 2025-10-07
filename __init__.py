@@ -1,1 +1,3 @@
-from .charslit import *  # noqa: F403, F401
+from .charslit import extract
+
+__all__ = ["extract"]
