@@ -48,7 +48,7 @@ def test_extract_basic():
     slitdeltas = np.linspace(-5, 5, ny, dtype=np.float64)
     
     # Initial slit function, horizontal median of im
-    slit_func_in = sigma_clip(im, sigma=3).median(axis=1)
+    slit_func_in = np.median(sigma_clip(im, sigma=3),axis=1)
     # oversample slit_func_in
     slit_func_in = np.interp(np.linspace(0, ny-1, ny), np.arange(nrows), slit_func_in)
     # normalize 
