@@ -21,6 +21,8 @@ def ensure_test_data():
     This fixture runs once per test session and automatically generates
     test data if the required files are missing. This ensures tests
     can run even on a fresh checkout without manual setup.
+
+    This also ensures slitdeltas files are generated after test data.
     """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
     data_dir = os.path.join(base_dir, "data")
@@ -46,6 +48,30 @@ def ensure_test_data():
             pytest.fail(f"Failed to generate test data:\n{result.stderr}")
 
         print("✓ Test data generated successfully")
+
+    # Check for slitdeltas files (sentinel: one of the slitdeltas files)
+    slitdeltas_file = os.path.join(data_dir, "slitdeltas_test_data_shifted.npz")
+
+    if not os.path.exists(slitdeltas_file):
+        print("\n⚠️  Slit delta files not found. Generating them now...")
+        make_slitdeltas_script = os.path.join(base_dir, "make_slitdeltas.py")
+
+        if not os.path.exists(make_slitdeltas_script):
+            pytest.fail(
+                f"Cannot generate slit deltas: {make_slitdeltas_script} not found"
+            )
+
+        result = subprocess.run(
+            ["uv", "run", "python", make_slitdeltas_script],
+            cwd=base_dir,
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode != 0:
+            pytest.fail(f"Failed to generate slit deltas:\n{result.stderr}")
+
+        print("✓ Slit delta files generated successfully")
 
     return data_dir
 
