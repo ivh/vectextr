@@ -1,6 +1,6 @@
 #manually added
 goodplots/
-slitdelta_plots/
+plots/
 slitdeltas_*
 test_data*.fits
 multislope_deltas.npz

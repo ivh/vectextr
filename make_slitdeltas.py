@@ -272,7 +272,7 @@ def plot_results(results):
             plt.legend()
             plt.grid(True)
             plt.tight_layout()
-            plt.savefig(f"slitdelta_plots/{basename}_peak_positions.png")
+            plt.savefig(f"plots/{basename}_peak_positions.png")
 
         plt.close("all")
 
