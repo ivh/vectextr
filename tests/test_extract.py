@@ -4,6 +4,7 @@ import matplotlib.pyplot as plt
 from astropy.io import fits
 from astropy.stats import sigma_clip
 import os
+import subprocess
 
 # Try to import charslit module
 try:
@@ -12,45 +13,82 @@ except ImportError:
     pytest.skip("charslit module not installed", allow_module_level=True)
 
 
-@pytest.fixture
-def default_datasets():
-    """Fixture providing the default list of test datasets from fixed_test_extract.py"""
+@pytest.fixture(scope="session", autouse=True)
+def ensure_test_data():
+    """
+    Ensure test data files exist before running any tests.
+
+    This fixture runs once per test session and automatically generates
+    test data if the required files are missing. This ensures tests
+    can run even on a fresh checkout without manual setup.
+    """
     base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    data_dir = os.path.join(base_dir, "data")
+
+    # Check for the main test data file as a sentinel
+    test_data_file = os.path.join(data_dir, "test_data_shifted.fits")
+
+    if not os.path.exists(test_data_file):
+        print("\n⚠️  Test data files not found. Generating them now...")
+        make_script = os.path.join(base_dir, "make_testdata.py")
+
+        if not os.path.exists(make_script):
+            pytest.fail(f"Cannot generate test data: {make_script} not found")
+
+        result = subprocess.run(
+            ["uv", "run", "python", make_script],
+            cwd=base_dir,
+            capture_output=True,
+            text=True,
+        )
+
+        if result.returncode != 0:
+            pytest.fail(f"Failed to generate test data:\n{result.stderr}")
+
+        print("✓ Test data generated successfully")
+
+    return data_dir
+
+
+@pytest.fixture
+def default_datasets(ensure_test_data):
+    """Fixture providing the default list of test datasets."""
+    data_dir = ensure_test_data  # This is now the data directory path
     return [
         {
             "name": "unshifted",
-            "fits": os.path.join(base_dir, "test_data_unshifted.fits"),
-            "npz": os.path.join(base_dir, "slitdeltas_test_data_unshifted.npz"),
+            "fits": os.path.join(data_dir, "test_data_unshifted.fits"),
+            "npz": os.path.join(data_dir, "slitdeltas_test_data_unshifted.npz"),
         },
         {
             "name": "shifted",
-            "fits": os.path.join(base_dir, "test_data_shifted.fits"),
-            "npz": os.path.join(base_dir, "slitdeltas_test_data_shifted.npz"),
+            "fits": os.path.join(data_dir, "test_data_shifted.fits"),
+            "npz": os.path.join(data_dir, "slitdeltas_test_data_shifted.npz"),
         },
         {
             "name": "discontinuous",
-            "fits": os.path.join(base_dir, "test_data_discontinuous.fits"),
-            "npz": os.path.join(base_dir, "slitdeltas_test_data_discontinuous.npz"),
+            "fits": os.path.join(data_dir, "test_data_discontinuous.fits"),
+            "npz": os.path.join(data_dir, "slitdeltas_test_data_discontinuous.npz"),
         },
         {
             "name": "multislope",
-            "fits": os.path.join(base_dir, "test_data_multislope.fits"),
-            "npz": os.path.join(base_dir, "slitdeltas_test_data_multislope.npz"),
+            "fits": os.path.join(data_dir, "test_data_multislope.fits"),
+            "npz": os.path.join(data_dir, "slitdeltas_test_data_multislope.npz"),
         },
         {
             "name": "Rsim",
-            "fits": os.path.join(base_dir, "test_data_Rsim.fits"),
-            "npz": os.path.join(base_dir, "slitdeltas_test_data_Rsim.npz"),
+            "fits": os.path.join(data_dir, "test_data_Rsim.fits"),
+            "npz": os.path.join(data_dir, "slitdeltas_test_data_Rsim.npz"),
         },
         {
             "name": "Hsim",
-            "fits": os.path.join(base_dir, "test_data_Hsim.fits"),
-            "npz": os.path.join(base_dir, "slitdeltas_test_data_Hsim.npz"),
+            "fits": os.path.join(data_dir, "test_data_Hsim.fits"),
+            "npz": os.path.join(data_dir, "slitdeltas_test_data_Hsim.npz"),
         },
     ]
 
 
-def test_extract_basic():
+def test_extract_basic(ensure_test_data):
     """
     Basic test for the extract function with a simple Gaussian-like pattern
     """
@@ -62,8 +100,8 @@ def test_extract_basic():
     maxiter = 10
 
     # Load the FITS file data
-    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
-    fits_file = os.path.join(base_dir, "test_data.fits")
+    data_dir = ensure_test_data
+    fits_file = os.path.join(data_dir, "test_data.fits")
     with fits.open(fits_file) as hdul:
         # Get the data from the 0th extension
         im = hdul[0].data.astype(np.float64)
@@ -159,7 +197,10 @@ def test_extract_basic():
     plt.tight_layout()
 
     # Save the figure to a file instead of showing it
-    output_file = "charslit_visualization.png"
+    base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+    plots_dir = os.path.join(base_dir, "plots")
+    os.makedirs(plots_dir, exist_ok=True)
+    output_file = os.path.join(plots_dir, "charslit_visualization.png")
     plt.savefig(output_file, dpi=150)
     print(f"Visualization saved to {output_file}")
 
@@ -383,7 +424,13 @@ def test_extract_with_file(default_datasets, fits_file, slitchar_file, request):
         plt.tight_layout()
 
         # Save the figure
-        output_file = fname.replace(".fits", f"_{test_name}_visualization.png")
+        base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+        plots_dir = os.path.join(base_dir, "plots")
+        os.makedirs(plots_dir, exist_ok=True)
+        output_filename = os.path.basename(fname).replace(
+            ".fits", f"_{test_name}_visualization.png"
+        )
+        output_file = os.path.join(plots_dir, output_filename)
         plt.savefig(output_file, dpi=150)
         print(f"Visualization saved to {output_file}")
 
