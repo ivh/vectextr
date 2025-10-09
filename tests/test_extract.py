@@ -82,14 +82,14 @@ def default_datasets(ensure_test_data):
     data_dir = ensure_test_data  # This is now the data directory path
     return [
         {
-            "name": "unshifted",
-            "fits": os.path.join(data_dir, "test_data_unshifted.fits"),
-            "npz": os.path.join(data_dir, "slitdeltas_test_data_unshifted.npz"),
-        },
-        {
             "name": "shifted",
             "fits": os.path.join(data_dir, "test_data_shifted.fits"),
             "npz": os.path.join(data_dir, "slitdeltas_test_data_shifted.npz"),
+        },
+        {
+            "name": "unshifted",
+            "fits": os.path.join(data_dir, "test_data_unshifted.fits"),
+            "npz": os.path.join(data_dir, "slitdeltas_test_data_unshifted.npz"),
         },
         {
             "name": "discontinuous",
@@ -453,9 +453,7 @@ def test_extract_with_file(default_datasets, fits_file, slitchar_file, request):
         base_dir = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
         plots_dir = os.path.join(base_dir, "plots")
         os.makedirs(plots_dir, exist_ok=True)
-        output_filename = os.path.basename(fname).replace(
-            ".fits", f"_{test_name}_visualization.png"
-        )
+        output_filename = f"{test_name}_visualization.png"
         output_file = os.path.join(plots_dir, output_filename)
         plt.savefig(output_file, dpi=150)
         print(f"Visualization saved to {output_file}")
