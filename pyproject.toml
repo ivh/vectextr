@@ -14,18 +14,7 @@ dependencies = [
     "scipy>=1.7.0",
 ]
 
-[project.optional-dependencies]
-dev = [
-    "nanobind",
-]
-
-[project.scripts]
-pytest = "pytest:console_main"
-
 [dependency-groups]
-test = [
-    "pytest>=7.0.0",
-]
 dev = [
     "pytest>=7.0.0",
     "nanobind",
@@ -33,18 +22,16 @@ dev = [
     "ruff>=0.8.0",
 ]
 
+[tool.hatch.build.targets.wheel]
+packages = ["charslit"]
+
 [tool.hatch.build]
 exclude = [
     "*.npz",
     "*.fits",
+    "*.png",
     "goodplots/",
     "slitdelta_plots/",
     "build/",
     ".git/",
 ]
-
-[tool.hatch.build.targets.wheel.hooks.custom]
-
-[tool.pytest.ini_options]
-testpaths = ["tests"]
-python_files = "test_*.py"

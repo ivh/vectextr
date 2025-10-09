@@ -67,11 +67,6 @@ dependencies = [
     { name = "scipy" },
 ]
 
-[package.optional-dependencies]
-dev = [
-    { name = "nanobind" },
-]
-
 [package.dev-dependencies]
 dev = [
     { name = "nanobind" },
@@ -79,19 +74,14 @@ dev = [
     { name = "pytest" },
     { name = "ruff" },
 ]
-test = [
-    { name = "pytest" },
-]
 
 [package.metadata]
 requires-dist = [
     { name = "astropy", specifier = ">=5.0.0" },
     { name = "matplotlib", specifier = ">=3.5.0" },
-    { name = "nanobind", marker = "extra == 'dev'" },
     { name = "numpy", specifier = ">=1.20.0" },
     { name = "scipy", specifier = ">=1.7.0" },
 ]
-provides-extras = ["dev"]
 
 [package.metadata.requires-dev]
 dev = [
@@ -100,7 +90,6 @@ dev = [
     { name = "pytest", specifier = ">=7.0.0" },
     { name = "ruff", specifier = ">=0.8.0" },
 ]
-test = [{ name = "pytest", specifier = ">=7.0.0" }]
 
 [[package]]
 name = "colorama"
