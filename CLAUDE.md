@@ -28,7 +28,7 @@ uv run pre-commit install
 
 ```bash
 # Run tests
-uv run pytest
+uv run py.test
 
 ```
 

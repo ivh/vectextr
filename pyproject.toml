@@ -35,3 +35,6 @@ exclude = [
     "build/",
     ".git/",
 ]
+
+[tool.pytest.ini_options]
+pythonpath = ["."]
