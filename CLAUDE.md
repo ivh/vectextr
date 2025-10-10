@@ -4,6 +4,17 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 ## Overview
 
+This package contains the central slit-decomposition algorithm from PyReduce (see [Piskunov, Wehrhahn & Marquart 2021](https://doi.org/10.1051/0004-6361/202038293)), extracted for further development. It extracts 1D spectra from 2D detector frames captured by echelle spectrographs.
+
+### Progression Beyond Polynomial Slit Shapes
+
+The code here extends the original polynomial-based slit shape model (described in the paper) to support **array-based slit descriptions**. Instead of polynomial coefficients, the slit is now described by an array of `delta_x` values—pixel shifts from vertical—that specify how the slit curves from row to row in each spectral order.
+
+### Workflow
+
+1. **Generate test data**: `make_testdata.py` creates synthetic detector frames
+2. **Measure slit deltas**: `make_slitdeltas.py` measures the `delta_x` values from the data
+3. **Extract spectra**: Run `uv run py.test` to perform extraction using both the data and measured deltas
 
 
 ## Development Setup

@@ -29,6 +29,8 @@ uv sync
 uv build
 ```
 
+**Also see CLAUDE.md** for some more technical info.
+
 ## References
 
 - Piskunov, N. E., & Valenti, J. A. (2002). *Spectroscopy Made Easy: A New Tool for Fitting Observations with Synthetic Spectra.* A&A, 385, 1095-1106
